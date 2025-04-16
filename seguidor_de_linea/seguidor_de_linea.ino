@@ -1,11 +1,16 @@
 #include <QTRSensors.h>
 
-#define BotonPin 18
-#define LedPin 19
+#define PínMotorA 16
+#define PínMotorA 17
+#define PínMotorB 18
+#define PínMotorB 19
+#define BotonPin 12
+#define LedPin 11
 #define PinIn1 4
-#define PinIn2 5c:\Users\danie\Documents\Velocista-Seguidor-Linea\cartest4\cartest4.ino
+#define PinIn2 5
 #define PinIn3 6
 #define PinIn4 7
+
 
 //variavles de control y configuracion
 int cruzero = 45 ; //velozidad incial
@@ -30,7 +35,7 @@ void setup() {
   Serial.begin(9600);
 
   //configuracion de pines -falta
-  pinMode(BotonPin, INPUT);
+  pinMode(BotonPin, INPUT_PULLUP);
 
   qtr.setTypeRC();
   qtr.setSensorPins(sensorPins, NUM_SENSORS);
@@ -46,14 +51,14 @@ void setup() {
 void loop() {
 
   int estadoBoton = digitalRead(BotonPin);
-
+  Serial.println(estadoBoton);
   if (estadoBoton == LOW){
     calibrar();
   }
 
   qtr.read (sensorValues);
   position = qtr.readLineBlack(sensorValues);
-  PRO = ((position) - 3500);c:\Users\danie\Documents\Velocista-Seguidor-Linea\seguidor_de_linea\seguidor_de_linea.ino
+  PRO = ((position) - 3500);
 
   Serial.println(String(position) + " posicion\n" + String(PRO) + " PRO");
 
@@ -77,6 +82,7 @@ void loop() {
 }
 
 void calibrar(){
+  Serial.println("calibrar");
   digitalWrite(LedPin, HIGH);
   for (int i = 0; i < 200; i++) {
     qtr.calibrate();
