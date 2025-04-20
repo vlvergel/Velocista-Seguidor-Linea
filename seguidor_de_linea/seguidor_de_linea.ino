@@ -68,18 +68,18 @@ void loop() {
   Serial.println(String(position) + " posicion\n" + String(PRO) + " PRO");
 
   if (PRO < - 2800){ //VALOR TEMPORAL
-    digitalWrite();
+    digitalWrite( , LOW);
     analogWrite();
 
-    digitalWrite();
-    analogWrite());
-    
+    digitalWrite( , LOW);
+    analogWrite();
+
   }else if(PRO > 2800){
     
-    digitalWrite();
+    digitalWrite(, LOW);
     analogWrite();
 
-    digitalWrite();
+    digitalWrite(, LOW);
     analogWrite());
 
   }else{
@@ -90,10 +90,10 @@ void loop() {
     if (VEL > cruzero) VEL = cruzero;
     if (VEL < -cruzero) VEL = -cruzero;
 
-    digitalWrite();
+    digitalWrite(, LOW);
     analogWrite(, cruzero - VEL);
 
-    digitalWrite();
+    digitalWrite(, LOW);
     analogWrite(, cruzero - VEL);
 
     // Actualización de la última posición
