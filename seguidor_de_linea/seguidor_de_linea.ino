@@ -1,9 +1,9 @@
 #include <QTRSensors.h>
 
-#define PínMotorA 16
-#define PínMotorA 17
-#define PínMotorB 18
-#define PínMotorB 19
+#define PinMotorA 16
+#define PinMotorA 17
+#define PinMotorB 18
+#define PinMotorB 19
 #define BotonPin 12
 #define LedPin 11
 #define PinIn1 4
@@ -42,6 +42,11 @@ void setup() {
   qtr.setTimeout(TIMEOUT);
   qtr.setEmitterPin(EMITTER_PIN);
 
+  pinMode(PinMotorA, OUTPUT);
+  pinMode(PinMotorA2, OUTPUT);
+  pinMode(PinMotorB, OUTPUT);
+  pinMode(PinMotorB2, OUTPUT);
+
   calibrar();
 
   // configuracion inicial de motores -falta
@@ -63,8 +68,19 @@ void loop() {
   Serial.println(String(position) + " posicion\n" + String(PRO) + " PRO");
 
   if (PRO < - 2800){ //VALOR TEMPORAL
+    digitalWrite();
+    analogWrite();
 
+    digitalWrite();
+    analogWrite());
+    
   }else if(PRO > 2800){
+    
+    digitalWrite();
+    analogWrite();
+
+    digitalWrite();
+    analogWrite());
 
   }else{
     DER = (PRO - LAST);
@@ -74,6 +90,11 @@ void loop() {
     if (VEL > cruzero) VEL = cruzero;
     if (VEL < -cruzero) VEL = -cruzero;
 
+    digitalWrite();
+    analogWrite(, cruzero - VEL);
+
+    digitalWrite();
+    analogWrite(, cruzero - VEL);
 
     // Actualización de la última posición
         LAST = PRO;
