@@ -1,9 +1,9 @@
 #include <QTRSensors.h>
 
-#define PinMotorA 16
-#define PinMotorA 17
+#define PinMotorA 16  //derecha
+#define PinMotorA2 17 //izquierda
 #define PinMotorB 18
-#define PinMotorB 19
+#define PinMotorB2 19
 #define BotonPin 12
 #define LedPin 11
 #define PinIn1 4
@@ -68,19 +68,23 @@ void loop() {
   Serial.println(String(position) + " posicion\n" + String(PRO) + " PRO");
 
   if (PRO < - 2800){ //VALOR TEMPORAL
-    digitalWrite( , LOW);
-    analogWrite();
+    digitalWrite(PinMotorA2, HIGH);
+    digitalWrite(PinMotorA2 , LOW);
+    analogWrite(PinMotorA, 150);
 
-    digitalWrite( , LOW);
-    analogWrite();
+    digitalWrite(PinMotorB2 , LOW);
+    digitalWrite(PinMotorB , LOW);
+    //analogWrite(PinMotorB,);
 
   }else if(PRO > 2800){
     
-    digitalWrite(, LOW);
-    analogWrite();
+    digitalWrite(PinMotorA2, LOW);
+    digitalWrite(PinMotorA2 , LOW);
+    //analogWrite();
 
-    digitalWrite(, LOW);
-    analogWrite());
+    digitalWrite(PinMotorB2, HIGH);
+    digitalWrite(PinMotorB, LOW);
+    analogWrite(PinMotorB2, 150);
 
   }else{
     DER = (PRO - LAST);
@@ -90,11 +94,13 @@ void loop() {
     if (VEL > cruzero) VEL = cruzero;
     if (VEL < -cruzero) VEL = -cruzero;
 
-    digitalWrite(, LOW);
-    analogWrite(, cruzero - VEL);
-
-    digitalWrite(, LOW);
-    analogWrite(, cruzero - VEL);
+    digitalWrite(PinMotorA2, HIGH);
+    digitalWrite(PinMotorA2, LOW);
+    analogWrite(PinMotorA, cruzero - VEL);
+Serial.println("HI");
+    digitalWrite(PinMotorB2, HIGH);
+    digitalWrite(PinMotorB, LOW);
+    analogWrite(PinMotorB2, cruzero + VEL);
 
     // Actualización de la última posición
         LAST = PRO;
