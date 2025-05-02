@@ -1,5 +1,7 @@
 #include <QTRSensors.h>
+#include <IRremote.hpp>
 
+#define IR_RECEIVE_PIN 15
 #define PinMotorA 16  //derecha
 #define PinMotorA2 17 //izquierda
 #define PinMotorB 18
@@ -47,6 +49,8 @@ void setup() {
   pinMode(PinMotorB, OUTPUT);
   pinMode(PinMotorB2, OUTPUT);
 
+  IrReceiver.begin(IR_RECEIVE_PIN, ENABLE_LED_FEEDBACK); 
+
   calibrar();
 
   // configuracion inicial de motores -falta
@@ -54,57 +58,64 @@ void setup() {
 }
 
 void loop() {
+  if (IrReceiver.decode()) {
+    while(true){
+      if (IrReceiver.decode()) {
+        break;
+      }
+      int estadoBoton = digitalRead(BotonPin);
+      Serial.println(estadoBoton);
+      if (estadoBoton == LOW){
+        calibrar();
+      }
 
-  int estadoBoton = digitalRead(BotonPin);
-  Serial.println(estadoBoton);
-  if (estadoBoton == LOW){
-    calibrar();
+      qtr.read (sensorValues);
+      position = qtr.readLineBlack(sensorValues);
+      PRO = ((position) - 3500);
+
+      Serial.println(String(position) + " posicion\n" + String(PRO) + " PRO");
+
+      if (PRO < - 2800){ //VALOR TEMPORAL
+        digitalWrite(PinMotorA2, HIGH);
+        digitalWrite(PinMotorA2 , LOW);
+        analogWrite(PinMotorA, 150);
+
+        digitalWrite(PinMotorB2 , LOW);
+        digitalWrite(PinMotorB , LOW);
+        //analogWrite(PinMotorB,);
+
+      }else if(PRO > 2800){
+        
+        digitalWrite(PinMotorA2, LOW);
+        digitalWrite(PinMotorA2 , LOW);
+        //analogWrite();
+
+        digitalWrite(PinMotorB2, HIGH);
+        digitalWrite(PinMotorB, LOW);
+        analogWrite(PinMotorB2, 150);
+
+      }else{
+        DER = (PRO - LAST);
+        INT = (PRO + LAST);
+        VEL = (PRO * 0.55) + (DER * 4.2) + (INT * 0.006);// VALORES A CALIBRAR
+
+        if (VEL > cruzero) VEL = cruzero;
+        if (VEL < -cruzero) VEL = -cruzero;
+
+        digitalWrite(PinMotorA2, HIGH);
+        digitalWrite(PinMotorA2, LOW);
+        analogWrite(PinMotorA, cruzero - VEL);
+        Serial.println("HI");
+        digitalWrite(PinMotorB2, HIGH);
+        digitalWrite(PinMotorB, LOW);
+        analogWrite(PinMotorB2, cruzero + VEL);
+
+        // Actualización de la última posición
+            LAST = PRO;
+      }
+    }
   }
-
-  qtr.read (sensorValues);
-  position = qtr.readLineBlack(sensorValues);
-  PRO = ((position) - 3500);
-
-  Serial.println(String(position) + " posicion\n" + String(PRO) + " PRO");
-
-  if (PRO < - 2800){ //VALOR TEMPORAL
-    digitalWrite(PinMotorA2, HIGH);
-    digitalWrite(PinMotorA2 , LOW);
-    analogWrite(PinMotorA, 150);
-
-    digitalWrite(PinMotorB2 , LOW);
-    digitalWrite(PinMotorB , LOW);
-    //analogWrite(PinMotorB,);
-
-  }else if(PRO > 2800){
-    
-    digitalWrite(PinMotorA2, LOW);
-    digitalWrite(PinMotorA2 , LOW);
-    //analogWrite();
-
-    digitalWrite(PinMotorB2, HIGH);
-    digitalWrite(PinMotorB, LOW);
-    analogWrite(PinMotorB2, 150);
-
-  }else{
-    DER = (PRO - LAST);
-    INT = (PRO + LAST);
-    VEL = (PRO * 0.55) + (DER * 4.2) + (INT * 0.006);// VALORES A CALIBRAR
-
-    if (VEL > cruzero) VEL = cruzero;
-    if (VEL < -cruzero) VEL = -cruzero;
-
-    digitalWrite(PinMotorA2, HIGH);
-    digitalWrite(PinMotorA2, LOW);
-    analogWrite(PinMotorA, cruzero - VEL);
-Serial.println("HI");
-    digitalWrite(PinMotorB2, HIGH);
-    digitalWrite(PinMotorB, LOW);
-    analogWrite(PinMotorB2, cruzero + VEL);
-
-    // Actualización de la última posición
-        LAST = PRO;
-  }
+  
 
 }
 
