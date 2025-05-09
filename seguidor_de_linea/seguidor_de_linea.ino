@@ -1,17 +1,16 @@
 #include <QTRSensors.h>
 #include <IRremote.hpp>
 
-#define IR_RECEIVE_PIN 15
-#define PinMotorA 16  //derecha
-#define PinMotorA2 17 //izquierda
-#define PinMotorB 18
-#define PinMotorB2 19
-#define BotonPin 12
-#define LedPin 11
-#define PinIn1 4
-#define PinIn2 5
-#define PinIn3 6
-#define PinIn4 7
+#define IR_RECEIVE_PIN 11
+#define LedPin 12
+
+#define PWMA 19  // Pin PWM para motor A Derecha
+#define AIN2 18  // Pin dirección A2
+#define AIN1 17  // Pin dirección A1
+#define BIN1 16  // Pin dirección B1
+#define BIN2 15  // Pin dirección B2
+#define PWMB 14  // Pin PWM para motor B Izquierda
+
 
 
 //variavles de control y configuracion
@@ -31,23 +30,29 @@ uint8_t sensorPins[NUM_SENSORS] = {3, 4, 5, 6, 7, 8, 9, 10};
 unsigned int  sensorValues[NUM_SENSORS];
 unsigned int position = 0;
 
-
+bool estado = false;
 
 void setup() {
   Serial.begin(9600);
 
   //configuracion de pines -falta
-  pinMode(BotonPin, INPUT_PULLUP);
 
   qtr.setTypeRC();
   qtr.setSensorPins(sensorPins, NUM_SENSORS);
   qtr.setTimeout(TIMEOUT);
   qtr.setEmitterPin(EMITTER_PIN);
 
-  pinMode(PinMotorA, OUTPUT);
-  pinMode(PinMotorA2, OUTPUT);
-  pinMode(PinMotorB, OUTPUT);
-  pinMode(PinMotorB2, OUTPUT);
+  pinMode(PWMA, OUTPUT);
+  pinMode(AIN2, OUTPUT);
+  pinMode(AIN1, OUTPUT);
+  pinMode(PWMB, OUTPUT);
+  pinMode(BIN1, OUTPUT);
+  pinMode(BIN2, OUTPUT);
+
+  digitalWrite(AIN1, LOW);
+  digitalWrite(AIN2, HIGH);
+  digitalWrite(BIN1, HIGH);
+  digitalWrite(BIN2, LOW);
 
   IrReceiver.begin(IR_RECEIVE_PIN, ENABLE_LED_FEEDBACK); 
 
@@ -58,65 +63,75 @@ void setup() {
 }
 
 void loop() {
+  Serial.println("fuera");
   if (IrReceiver.decode()) {
-    while(true){
-      if (IrReceiver.decode()) {
-        break;
-      }
-      int estadoBoton = digitalRead(BotonPin);
-      Serial.println(estadoBoton);
-      if (estadoBoton == LOW){
-        calibrar();
-      }
-
-      qtr.read (sensorValues);
-      position = qtr.readLineBlack(sensorValues);
-      PRO = ((position) - 3500);
-
-      Serial.println(String(position) + " posicion\n" + String(PRO) + " PRO");
-
-      if (PRO < - 2800){ //VALOR TEMPORAL
-        digitalWrite(PinMotorA2, HIGH);
-        digitalWrite(PinMotorA2 , LOW);
-        analogWrite(PinMotorA, 150);
-
-        digitalWrite(PinMotorB2 , LOW);
-        digitalWrite(PinMotorB , LOW);
-        //analogWrite(PinMotorB,);
-
-      }else if(PRO > 2800){
-        
-        digitalWrite(PinMotorA2, LOW);
-        digitalWrite(PinMotorA2 , LOW);
-        //analogWrite();
-
-        digitalWrite(PinMotorB2, HIGH);
-        digitalWrite(PinMotorB, LOW);
-        analogWrite(PinMotorB2, 150);
-
-      }else{
-        DER = (PRO - LAST);
-        INT = (PRO + LAST);
-        VEL = (PRO * 0.55) + (DER * 4.2) + (INT * 0.006);// VALORES A CALIBRAR
-
-        if (VEL > cruzero) VEL = cruzero;
-        if (VEL < -cruzero) VEL = -cruzero;
-
-        digitalWrite(PinMotorA2, HIGH);
-        digitalWrite(PinMotorA2, LOW);
-        analogWrite(PinMotorA, cruzero - VEL);
-        Serial.println("HI");
-        digitalWrite(PinMotorB2, HIGH);
-        digitalWrite(PinMotorB, LOW);
-        analogWrite(PinMotorB2, cruzero + VEL);
-
-        // Actualización de la última posición
-            LAST = PRO;
-      }
+    if(IrReceiver.decodedIRData.decodedRawData == 0xF20DFF00){
+      Serial.println("Código init");
+      estado=true;
     }
+    if(IrReceiver.decodedIRData.decodedRawData == 0xE31CFF00){
+      Serial.println("Código calibrar");
+      calibrar();
+    }
+    IrReceiver.resume(); 
   }
-  
 
+  while(estado){
+    
+    qtr.read (sensorValues);
+    position = qtr.readLineBlack(sensorValues);
+    PRO = ((position) - 3500);
+
+    Serial.println(String(position) + " posicion\n" + String(PRO) + " PRO");
+
+    if (PRO < - 2800){ //VALOR TEMPORAL
+      digitalWrite(AIN1, LOW);
+      digitalWrite(AIN2, HIGH);
+      analogWrite(PWMA, 150);
+
+      digitalWrite(BIN1, HIGH);
+      digitalWrite(BIN2, LOW);
+      analogWrite(PWMB, 50);
+
+    }else if(PRO > 2800){
+        
+      digitalWrite(AIN1, HIGH);
+      digitalWrite(AIN2, LOW);
+      analogWrite(PWMA, 50);
+
+      digitalWrite(BIN1, LOW);
+      digitalWrite(BIN2, HIGH);
+      analogWrite(PWMB, 150);
+
+    }else{
+      DER = (PRO - LAST);
+      INT = (PRO + LAST);
+      VEL = (PRO * 0.55) + (DER * 4.2) + (INT * 0.006);// VALORES A CALIBRAR
+
+      if (VEL > cruzero) VEL = cruzero;
+      if (VEL < -cruzero) VEL = -cruzero;
+
+      digitalWrite(AIN1, LOW);
+      digitalWrite(AIN2, HIGH);
+      analogWrite(PWMA, cruzero - VEL);
+
+      digitalWrite(BIN1, LOW);
+      digitalWrite(BIN2, HIGH);
+      analogWrite(PWMB, cruzero + VEL);
+
+      // Actualización de la última posición
+      LAST = PRO;
+    } 
+    if(IrReceiver.decode()){
+      if(IrReceiver.decodedIRData.decodedRawData == 0xE916FF00){
+        Serial.println("Código paro");
+        estado=false;
+      }
+      IrReceiver.resume(); 
+    } 
+  }
+  analogWrite(PWMA, 0);  // Velocidad (0-255)
+  analogWrite(PWMB, 0);
 }
 
 void calibrar(){
