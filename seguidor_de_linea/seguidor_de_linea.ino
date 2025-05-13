@@ -14,7 +14,7 @@
 
 
 //variavles de control y configuracion
-int cruzero = 45 ; //velozidad incial
+int cruzero = 135 ; //velozidad incial
 int PRO = 0 ;
 int INT = 0 ;
 int DER = 0 ;
@@ -26,7 +26,7 @@ float VEL ;//velocidad
 #define EMITTER_PIN 2
 
 QTRSensors qtr ;
-uint8_t sensorPins[NUM_SENSORS] = {3, 4, 5, 6, 7, 8, 9, 10};
+uint8_t sensorPins[NUM_SENSORS] = {10, 9, 8, 7, 6, 5, 4, 3};
 unsigned int  sensorValues[NUM_SENSORS];
 unsigned int position = 0;
 
@@ -82,43 +82,60 @@ void loop() {
     position = qtr.readLineBlack(sensorValues);
     PRO = ((position) - 3500);
 
-    Serial.println(String(position) + " posicion\n" + String(PRO) + " PRO");
+    Serial.println(String(position) + " posicion " + String(PRO) + " PRO");
 
-    if (PRO < - 2800){ //VALOR TEMPORAL
+    if (PRO < - 2500){ //VALOR TEMPORAL
+      Serial.println("izquierda");
       digitalWrite(AIN1, LOW);
       digitalWrite(AIN2, HIGH);
-      analogWrite(PWMA, 150);
-
-      digitalWrite(BIN1, HIGH);
-      digitalWrite(BIN2, LOW);
-      analogWrite(PWMB, 50);
-
-    }else if(PRO > 2800){
-        
-      digitalWrite(AIN1, HIGH);
-      digitalWrite(AIN2, LOW);
-      analogWrite(PWMA, 50);
+      analogWrite(PWMA, 200);
 
       digitalWrite(BIN1, LOW);
       digitalWrite(BIN2, HIGH);
-      analogWrite(PWMB, 150);
+      analogWrite(PWMB, 135);
+
+    }else if(PRO > 2500){
+
+      Serial.println("izquierda");
+      digitalWrite(AIN1, HIGH);
+      digitalWrite(AIN2, LOW);
+      analogWrite(PWMA, 135);
+
+      digitalWrite(BIN1, HIGH);
+      digitalWrite(BIN2, LOW);
+      analogWrite(PWMB, 200);
 
     }else{
       DER = (PRO - LAST);
       INT = (PRO + LAST);
-      VEL = (PRO * 0.55) + (DER * 4.2) + (INT * 0.006);// VALORES A CALIBRAR
-
+      VEL = (PRO * 0.1) + (DER * 4.5) + (INT * 0.006);// VALORES A CALIBRAR
+      Serial.println(VEL);
       if (VEL > cruzero) VEL = cruzero;
       if (VEL < -cruzero) VEL = -cruzero;
 
       digitalWrite(AIN1, LOW);
       digitalWrite(AIN2, HIGH);
-      analogWrite(PWMA, cruzero - VEL);
 
-      digitalWrite(BIN1, LOW);
-      digitalWrite(BIN2, HIGH);
-      analogWrite(PWMB, cruzero + VEL);
+      digitalWrite(BIN1, HIGH);
+      digitalWrite(BIN2, LOW);
 
+      Serial.print("motor 1 :");
+      Serial.print(cruzero - VEL);
+      Serial.print(" motor 2 :");
+      Serial.println(cruzero + VEL);
+      
+      if ((cruzero - VEL)<135 && (cruzero - VEL) != 0){
+        analogWrite(PWMA, 135);
+      }else{
+        analogWrite(PWMA, cruzero - VEL);
+      }
+
+      if ((cruzero + VEL)<135 && (cruzero + VEL) != 0){
+        analogWrite(PWMB, 135);
+      }else{
+        analogWrite(PWMB, cruzero + VEL);
+      }
+      
       // Actualización de la última posición
       LAST = PRO;
     } 
