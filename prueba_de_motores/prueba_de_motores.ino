@@ -19,8 +19,8 @@ void setup() {
   pinMode(BIN1, OUTPUT);
   pinMode(BIN2, OUTPUT);
 
-  digitalWrite(AIN1, LOW);
-  digitalWrite(AIN2, HIGH);
+  digitalWrite(AIN2, LOW);
+  digitalWrite(AIN1, HIGH);
   digitalWrite(BIN1, HIGH);
   digitalWrite(BIN2, LOW);
 
@@ -42,8 +42,8 @@ void loop() {
   }
   while(estado){
     Serial.println("motor");
-    analogWrite(PWMA, 200);  // Velocidad (0-255)
-    analogWrite(PWMB, 200);
+    analogWrite(PWMA, 128);  // Velocidad (0-255)
+    analogWrite(PWMB, 128);
 
    if(IrReceiver.decode()){
       Serial.println("salir");

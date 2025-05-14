@@ -14,7 +14,7 @@
 
 
 //variavles de control y configuracion
-int cruzero = 135 ; //velozidad incial
+int cruzero = 128 ; //velozidad incial
 int PRO = 0 ;
 int INT = 0 ;
 int DER = 0 ;
@@ -49,10 +49,10 @@ void setup() {
   pinMode(BIN1, OUTPUT);
   pinMode(BIN2, OUTPUT);
 
-  digitalWrite(AIN1, LOW);
-  digitalWrite(AIN2, HIGH);
-  digitalWrite(BIN1, HIGH);
+  digitalWrite(AIN1, HIGH);
+  digitalWrite(AIN2, LOW);
   digitalWrite(BIN2, LOW);
+  digitalWrite(BIN1, HIGH);
 
   IrReceiver.begin(IR_RECEIVE_PIN, ENABLE_LED_FEEDBACK); 
 
@@ -86,8 +86,8 @@ void loop() {
 
     if (PRO < - 2500){ //VALOR TEMPORAL
       Serial.println("izquierda");
-      digitalWrite(AIN1, LOW);
-      digitalWrite(AIN2, HIGH);
+      digitalWrite(AIN2, LOW);
+      digitalWrite(AIN1, HIGH);
       analogWrite(PWMA, 200);
 
       digitalWrite(BIN1, LOW);
@@ -97,8 +97,8 @@ void loop() {
     }else if(PRO > 2500){
 
       Serial.println("izquierda");
-      digitalWrite(AIN1, HIGH);
-      digitalWrite(AIN2, LOW);
+      digitalWrite(AIN2, HIGH);
+      digitalWrite(AIN1, LOW);
       analogWrite(PWMA, 135);
 
       digitalWrite(BIN1, HIGH);
@@ -108,13 +108,13 @@ void loop() {
     }else{
       DER = (PRO - LAST);
       INT = (PRO + LAST);
-      VEL = (PRO * 0.1) + (DER * 4.5) + (INT * 0.006);// VALORES A CALIBRAR
+      VEL = (PRO * 0.1) + (DER * 1.5) + (INT * 0.006);// VALORES A CALIBRAR
       Serial.println(VEL);
       if (VEL > cruzero) VEL = cruzero;
       if (VEL < -cruzero) VEL = -cruzero;
 
-      digitalWrite(AIN1, LOW);
-      digitalWrite(AIN2, HIGH);
+      digitalWrite(AIN2, LOW);
+      digitalWrite(AIN1, HIGH);
 
       digitalWrite(BIN1, HIGH);
       digitalWrite(BIN2, LOW);
@@ -124,14 +124,14 @@ void loop() {
       Serial.print(" motor 2 :");
       Serial.println(cruzero + VEL);
       
-      if ((cruzero - VEL)<135 && (cruzero - VEL) != 0){
-        analogWrite(PWMA, 135);
+      if ((cruzero - VEL)<128 && (cruzero - VEL) != 0){
+        analogWrite(PWMA, 128);
       }else{
         analogWrite(PWMA, cruzero - VEL);
       }
 
-      if ((cruzero + VEL)<135 && (cruzero + VEL) != 0){
-        analogWrite(PWMB, 135);
+      if ((cruzero + VEL)<128 && (cruzero + VEL) != 0){
+        analogWrite(PWMB, 128);
       }else{
         analogWrite(PWMB, cruzero + VEL);
       }
